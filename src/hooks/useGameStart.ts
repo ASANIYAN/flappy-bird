@@ -40,20 +40,15 @@ const useGameStart = () => {
   }, [addPipe]);
 
   const checkPipeCollision = (birdY: number, pipe: Pipe) => {
-    // Bird boundaries
-
     const birdTop = birdY;
     const birdBottom = birdY + BIRD_HEIGHT;
 
-    // Pipe boundaries
     const pipeLeft = pipe.x;
     const pipeRight = pipe.x + PIPE_WIDTH;
 
-    // Gap boundaries
     const gapTop = pipe.gapY;
     const gapBottom = pipe.gapY + PIPE_GAP_SIZE;
 
-    // Check horizontal overlap
     const hasHorizontalOverlap = BIRD_RIGHT > pipeLeft && BIRD_LEFT < pipeRight;
 
     if (!hasHorizontalOverlap) {
@@ -69,7 +64,7 @@ const useGameStart = () => {
     const hitTopPipe = birdTop < gapTop;
     const hitBottomPipe = birdBottom > gapBottom;
 
-    // Determine if approaching from side (more precise detection)
+    // Determine if approaching from side
     const birdCenterX = BIRD_X + BIRD_WIDTH / 2;
     const pipeCenterX = pipe.x + PIPE_WIDTH / 2;
     const isApproachingFromSide = birdCenterX < pipeCenterX - PIPE_WIDTH / 4;
@@ -160,10 +155,9 @@ const useGameStart = () => {
           if (collision.hasCollision) {
             collisionDetected = true;
 
-            // Since we already prevented penetration above, this handles edge cases
             if (collision.hitTopPipe) {
               if (collision.isApproachingFromSide) {
-                // Bird hit side of top pipe - keep at current constrained position
+                // Bird hit side of top pipe
                 setBird({ y: currentBirdY, velocity: 0 });
               } else {
                 // Hit from below - position at gap top
@@ -171,10 +165,10 @@ const useGameStart = () => {
               }
             } else if (collision.hitBottomPipe) {
               if (collision.isApproachingFromSide) {
-                // Bird hit side of bottom pipe - keep at current constrained position
+                // Bird hit side of bottom pipe
                 setBird({ y: currentBirdY, velocity: 0 });
               } else {
-                // Hit from above - position at gap bottom
+                // Hit from above
                 setBird({
                   y: pipe.gapY + PIPE_GAP_SIZE - BIRD_HEIGHT,
                   velocity: 0,
