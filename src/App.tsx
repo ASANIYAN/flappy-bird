@@ -8,6 +8,7 @@ import { usePipeStore } from "./store/pipeStore";
 
 function App() {
   const { pipes } = usePipeStore();
+
   useGameStart();
   useSpaceBarTap();
 

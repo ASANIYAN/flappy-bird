@@ -1,5 +1,7 @@
 import {
   BIRD_HEIGHT,
+  BIRD_LEFT,
+  BIRD_RIGHT,
   BIRD_WIDTH,
   BIRD_X,
   GRAVITY,
@@ -17,11 +19,11 @@ import { useCallback, useEffect, useRef } from "react";
 const useGameStart = () => {
   const { setBird } = useBirdStore();
   const { updatePipes, addPipe } = usePipeStore();
+  const { gameState, setIsGameRunning, setIsGameOver, incrementScore } =
+    useGameStateStore();
 
   const frameCountRef = useRef<number>(0);
   const animationFrameRef = useRef<number | undefined>(undefined);
-
-  const { gameState, setIsGameRunning, setIsGameOver } = useGameStateStore();
 
   const handleSpawnPipe = useCallback(() => {
     frameCountRef.current++;
@@ -39,8 +41,7 @@ const useGameStart = () => {
 
   const checkPipeCollision = (birdY: number, pipe: Pipe) => {
     // Bird boundaries
-    const birdLeft = BIRD_X;
-    const birdRight = BIRD_X + BIRD_WIDTH;
+
     const birdTop = birdY;
     const birdBottom = birdY + BIRD_HEIGHT;
 
@@ -53,7 +54,7 @@ const useGameStart = () => {
     const gapBottom = pipe.gapY + PIPE_GAP_SIZE;
 
     // Check horizontal overlap
-    const hasHorizontalOverlap = birdRight > pipeLeft && birdLeft < pipeRight;
+    const hasHorizontalOverlap = BIRD_RIGHT > pipeLeft && BIRD_LEFT < pipeRight;
 
     if (!hasHorizontalOverlap) {
       return {
@@ -101,7 +102,6 @@ const useGameStart = () => {
           return { y: GROUND_LEVEL, velocity: 0 };
         }
 
-        // Check pipe penetration prevention - constrain bird movement within gaps
         updatePipes((currentPipes) => {
           for (const pipe of currentPipes) {
             const birdRight = BIRD_X + BIRD_WIDTH;
@@ -144,6 +144,7 @@ const useGameStart = () => {
           const pipeRight = pipe.x + PIPE_WIDTH;
           return pipeRight > BIRD_X; // Remove when pipe's right edge passes bird's left edge
         });
+        let updatedPipes = activePipes;
 
         for (const pipe of activePipes) {
           // Only check pipes that haven't fully passed the bird yet
@@ -182,10 +183,17 @@ const useGameStart = () => {
             }
             break; // Exit after first collision
           }
+
+          if (BIRD_RIGHT > pipeRight && !pipe.passed) {
+            incrementScore();
+            updatedPipes = activePipes.map((p) =>
+              p.id === pipe.id ? { ...p, passed: true } : p
+            );
+          }
         }
 
         // filters out off-screen pipes
-        return activePipes;
+        return updatedPipes;
       });
 
       if (collisionDetected) {
@@ -210,6 +218,7 @@ const useGameStart = () => {
     setIsGameRunning,
     updatePipes,
     handleSpawnPipe,
+    incrementScore,
   ]);
 };
 
