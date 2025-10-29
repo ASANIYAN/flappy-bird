@@ -29,8 +29,8 @@ const useGameStart = () => {
     if (frameCountRef.current >= SPAWN_INTERVAL) {
       addPipe({
         id: `pipe-${Date.now()}`,
-        x: 400,
-        gapY: Math.random() * 400 + 100, // Random between 100-500
+        x: 300,
+        gapY: Math.random() * 400 + 100,
         passed: false,
       });
       frameCountRef.current = 0;
@@ -53,21 +53,31 @@ const useGameStart = () => {
     const gapBottom = pipe.gapY + PIPE_GAP_SIZE;
 
     // Check horizontal overlap
-    const isOverlapping =
-      birdLeft < pipeRight - 10 && birdRight > pipeLeft + 10;
+    const hasHorizontalOverlap = birdRight > pipeLeft && birdLeft < pipeRight;
 
-    if (!isOverlapping) {
-      return { hitTopPipe: false, hitBottomPipe: false, hasCollision: false };
+    if (!hasHorizontalOverlap) {
+      return {
+        hitTopPipe: false,
+        hitBottomPipe: false,
+        hasCollision: false,
+        isApproachingFromSide: false,
+      };
     }
 
-    // Check which pipe was hit
+    // Check vertical collisions
     const hitTopPipe = birdTop < gapTop;
     const hitBottomPipe = birdBottom > gapBottom;
+
+    // Determine if approaching from side (more precise detection)
+    const birdCenterX = BIRD_X + BIRD_WIDTH / 2;
+    const pipeCenterX = pipe.x + PIPE_WIDTH / 2;
+    const isApproachingFromSide = birdCenterX < pipeCenterX - PIPE_WIDTH / 4;
 
     return {
       hitTopPipe,
       hitBottomPipe,
       hasCollision: hitTopPipe || hitBottomPipe,
+      isApproachingFromSide,
     };
   };
 
@@ -82,15 +92,46 @@ const useGameStart = () => {
 
       setBird((prevBird) => {
         const newVelocity = prevBird.velocity + GRAVITY;
-        const newY = prevBird.y + newVelocity;
+        let newY = prevBird.y + newVelocity;
         currentBirdY = newY;
 
+        // Check for ground collision first
         if (newY >= GROUND_LEVEL) {
           collisionDetected = true;
           return { y: GROUND_LEVEL, velocity: 0 };
         }
 
-        return { y: newY, velocity: newVelocity };
+        // Check pipe penetration prevention - constrain bird movement within gaps
+        updatePipes((currentPipes) => {
+          for (const pipe of currentPipes) {
+            const birdRight = BIRD_X + BIRD_WIDTH;
+            const birdLeft = BIRD_X;
+            const pipeLeft = pipe.x;
+            const pipeRight = pipe.x + PIPE_WIDTH;
+
+            // If bird is horizontally overlapping with pipe
+            if (birdRight > pipeLeft && birdLeft < pipeRight) {
+              const gapTop = pipe.gapY;
+              const gapBottom = pipe.gapY + PIPE_GAP_SIZE;
+
+              // If bird would enter the top pipe area, constrain to gap top
+              if (newY < gapTop) {
+                newY = gapTop;
+                collisionDetected = true;
+              }
+              // If bird would enter the bottom pipe area, constrain to gap bottom
+              else if (newY + BIRD_HEIGHT > gapBottom) {
+                newY = gapBottom - BIRD_HEIGHT;
+                collisionDetected = true;
+              }
+            }
+          }
+          return currentPipes; // Return unchanged pipes
+        });
+
+        currentBirdY = newY;
+
+        return { y: newY, velocity: collisionDetected ? 0 : newVelocity };
       });
 
       updatePipes((prevPipes) => {
@@ -115,33 +156,31 @@ const useGameStart = () => {
 
           const collision = checkPipeCollision(currentBirdY, pipe);
 
-          if (collision.hitTopPipe || collision.hitBottomPipe) {
-            console.log("FALSE COLLISION DEBUG:", {
-              pipeId: pipe.id,
-              pipeX: pipe.x,
-              pipeGapY: pipe.gapY,
-              birdX: BIRD_X,
-              birdY: currentBirdY,
-              birdRight: BIRD_X + BIRD_WIDTH,
-              pipeLeft: pipe.x,
-              pipeRight: pipe.x + PIPE_WIDTH,
-              isOverlapping:
-                BIRD_X + BIRD_WIDTH > pipe.x && BIRD_X < pipe.x + PIPE_WIDTH,
-            });
-          }
+          if (collision.hasCollision) {
+            collisionDetected = true;
 
-          if (collision.hitTopPipe) {
-            collisionDetected = true;
-            setBird({
-              y: pipe.gapY - BIRD_HEIGHT,
-              velocity: 0,
-            });
-          } else if (collision.hitBottomPipe) {
-            collisionDetected = true;
-            setBird({
-              y: pipe.gapY + PIPE_GAP_SIZE,
-              velocity: 0,
-            });
+            // Since we already prevented penetration above, this handles edge cases
+            if (collision.hitTopPipe) {
+              if (collision.isApproachingFromSide) {
+                // Bird hit side of top pipe - keep at current constrained position
+                setBird({ y: currentBirdY, velocity: 0 });
+              } else {
+                // Hit from below - position at gap top
+                setBird({ y: pipe.gapY, velocity: 0 });
+              }
+            } else if (collision.hitBottomPipe) {
+              if (collision.isApproachingFromSide) {
+                // Bird hit side of bottom pipe - keep at current constrained position
+                setBird({ y: currentBirdY, velocity: 0 });
+              } else {
+                // Hit from above - position at gap bottom
+                setBird({
+                  y: pipe.gapY + PIPE_GAP_SIZE - BIRD_HEIGHT,
+                  velocity: 0,
+                });
+              }
+            }
+            break; // Exit after first collision
           }
         }
 
