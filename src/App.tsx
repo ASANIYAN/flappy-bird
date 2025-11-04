@@ -19,7 +19,7 @@ function App() {
       {pipes.map((pipe) => (
         <PipeItem key={pipe.id} pipe={pipe} />
       ))}
-      {/* <DebugInfo /> */} {/* Uncomment for debugging */}
+      {/* <DebugInfo /> */}
     </Layout>
   );
 }
