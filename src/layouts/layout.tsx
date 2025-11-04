@@ -42,7 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center bg-gray-100 p-5">
+    <section className="relative min-h-screen flex flex-col items-center justify-center bg-gray-100 px-5 py-2.5">
       <section className="flex items-center justify-center">
         <section
           className="relative overflow-hidden bg-white shadow-lg"

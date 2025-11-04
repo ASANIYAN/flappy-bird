@@ -3,6 +3,7 @@ import { useBirdStore } from "@/store/birdStore";
 import { usePipeStore } from "@/store/pipeStore";
 import gameOverSvg from "@/assets/game-over.svg";
 import startPng from "@/assets/start.png";
+import { Button } from "./ui/button";
 
 const GameOverScreen = () => {
   const { gameState, resetGame } = useGameStateStore();
@@ -49,16 +50,20 @@ const GameOverScreen = () => {
 
         {/* Play Again Button */}
         <div className="animate-fade-in-delayed">
-          <button
+          <Button
             onClick={handleRestart}
-            className="group relative transform transition-all duration-200 hover:scale-105 active:scale-95"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleRestart();
+            }}
+            className="group relative transform transition-all duration-200 hover:scale-105 active:scale-95 bg-transparent border-none p-0 cursor-pointer touch-manipulation"
           >
             <img
               src={startPng}
               alt="Play Again"
-              className="w-20 h-20 drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-200"
+              className="w-20 h-20 drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-200 pointer-events-none"
             />
-          </button>
+          </Button>
 
           <p className="mt-4 text-white text-sm opacity-80 drop-shadow-sm">
             Tap to play again
