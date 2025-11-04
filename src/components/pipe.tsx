@@ -1,4 +1,11 @@
-import { CONTAINER_HEIGHT, PIPE_GAP_SIZE, PIPE_WIDTH } from "@/lib/constants";
+import {
+  CONTAINER_HEIGHT,
+  GROUND_HEIGHT,
+  PIPE_GAP_SIZE,
+  PIPE_WIDTH,
+} from "@/lib/constants";
+import top_pipe from "@/assets/top-pipe.svg";
+import bottom_pipe from "@/assets/bottom-pipe.svg";
 import type { Pipe } from "@/store/pipeStore";
 
 type PipeProps = {
@@ -8,27 +15,40 @@ type PipeProps = {
 const PipeItem = ({ pipe }: PipeProps) => {
   return (
     <>
-      <section
+      <div
         id={`pipe-${pipe.id}-top`}
-        className="absolute bg-green-600 top-0"
+        className="absolute top-0 overflow-hidden"
         style={{
-          border: "2px solid blue",
           height: `${pipe.gapY}px`,
           left: `${pipe.x}px`,
           width: `${PIPE_WIDTH}px`,
         }}
-      />
+      >
+        <img
+          src={top_pipe}
+          alt="pipe top"
+          className="w-full h-full object-cover object-bottom"
+        />
+      </div>
 
-      <section
+      <div
         id={`pipe-${pipe.id}-bottom`}
-        className="absolute bg-green-600 bottom-0"
+        className="absolute overflow-hidden"
         style={{
-          border: "2px solid blue",
           left: `${pipe.x}px`,
           width: `${PIPE_WIDTH}px`,
-          height: `${CONTAINER_HEIGHT - (pipe.gapY + PIPE_GAP_SIZE)}px`,
+          top: `${pipe.gapY + PIPE_GAP_SIZE}px`,
+          height: `${
+            CONTAINER_HEIGHT - GROUND_HEIGHT - (pipe.gapY + PIPE_GAP_SIZE)
+          }px`,
         }}
-      />
+      >
+        <img
+          src={bottom_pipe}
+          alt="pipe bottom"
+          className="w-full h-full object-cover object-top"
+        />
+      </div>
     </>
   );
 };

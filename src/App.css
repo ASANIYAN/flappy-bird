@@ -1,0 +1,69 @@
+/* Wing flapping animation */
+@keyframes wing-flap {
+  0%,
+  100% {
+    transform: skewX(0deg) scaleX(1);
+    transform-origin: center right;
+  }
+  50% {
+    transform: skewX(-8deg) scaleX(0.9);
+    transform-origin: center right;
+  }
+}
+
+/* Tail swaying animation */
+@keyframes tail-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+    transform-origin: top center;
+  }
+  50% {
+    transform: rotate(-3deg);
+    transform-origin: top center;
+  }
+}
+
+/* Body bobbing animation */
+@keyframes body-bob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-0.5px);
+  }
+}
+
+/* Eye blink animation */
+@keyframes blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.2);
+  }
+}
+
+/* Apply animations */
+.wing-flap {
+  animation: wing-flap 0.25s ease-in-out infinite;
+}
+
+.tail-sway {
+  animation: tail-sway 0.8s ease-in-out infinite;
+}
+
+.body-bob {
+  animation: body-bob 0.4s ease-in-out infinite;
+}
+
+/* .blink {
+  animation: blink 4s ease-in-out infinite;
+} */
+
+.bird-flap {
+  transform-origin: center center;
+}

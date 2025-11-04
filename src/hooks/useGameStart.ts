@@ -78,7 +78,7 @@ const useGameStart = () => {
   };
 
   useEffect(() => {
-    if (!gameState.isGameRunning) return;
+    if (!gameState.isGameRunning || gameState.showStartScreen) return;
 
     const gameLoop = () => {
       let collisionDetected: boolean = false;
@@ -91,7 +91,7 @@ const useGameStart = () => {
         let newY = prevBird.y + newVelocity;
         currentBirdY = newY;
 
-        // Check for ground collision first
+        // Check for ground collision
         if (newY >= GROUND_LEVEL) {
           collisionDetected = true;
           return { y: GROUND_LEVEL, velocity: 0 };
@@ -109,19 +109,19 @@ const useGameStart = () => {
               const gapTop = pipe.gapY;
               const gapBottom = pipe.gapY + PIPE_GAP_SIZE;
 
-              // If bird would enter the top pipe area, constrain to gap top
+              // If bird would enter the top pipe area, stick to gap top
               if (newY < gapTop) {
                 newY = gapTop;
                 collisionDetected = true;
               }
-              // If bird would enter the bottom pipe area, constrain to gap bottom
+              // If bird would enter the bottom pipe area, stick to gap bottom
               else if (newY + BIRD_HEIGHT > gapBottom) {
                 newY = gapBottom - BIRD_HEIGHT;
                 collisionDetected = true;
               }
             }
           }
-          return currentPipes; // Return unchanged pipes
+          return currentPipes;
         });
 
         currentBirdY = newY;
@@ -175,7 +175,7 @@ const useGameStart = () => {
                 });
               }
             }
-            break; // Exit after first collision
+            break;
           }
 
           if (BIRD_RIGHT > pipeRight && !pipe.passed) {
@@ -207,6 +207,7 @@ const useGameStart = () => {
     };
   }, [
     gameState.isGameRunning,
+    gameState.showStartScreen,
     setBird,
     setIsGameOver,
     setIsGameRunning,

@@ -6,6 +6,7 @@ export interface GameState {
   highScore: number;
   isGameOver: boolean;
   isPaused: boolean;
+  showStartScreen: boolean;
 }
 
 export interface GameStateStore {
@@ -15,11 +16,13 @@ export interface GameStateStore {
   setHighScore: (highScore: number) => void;
   setIsGameOver: (isGameOver: boolean) => void;
   setIsPaused: (isPaused: boolean) => void;
+  setShowStartScreen: (showStartScreen: boolean) => void;
   setGameState: (gameState: GameState) => void;
   updateGameState: (updates: Partial<GameState>) => void;
   incrementScore: () => void;
   updateHighScore: (score: number) => void;
   resetGame: () => void;
+  startGame: () => void;
   clearGameState: () => void;
 }
 
@@ -29,6 +32,7 @@ const initialGameState: GameState = {
   highScore: 0,
   isGameOver: false,
   isPaused: false,
+  showStartScreen: true,
 };
 
 export const useGameStateStore = create<GameStateStore>()((set) => ({
@@ -59,6 +63,11 @@ export const useGameStateStore = create<GameStateStore>()((set) => ({
       gameState: { ...state.gameState, isPaused },
     })),
 
+  setShowStartScreen: (showStartScreen: boolean) =>
+    set((state) => ({
+      gameState: { ...state.gameState, showStartScreen },
+    })),
+
   setGameState: (gameState: GameState) => set({ gameState }),
 
   updateGameState: (updates: Partial<GameState>) =>
@@ -67,12 +76,16 @@ export const useGameStateStore = create<GameStateStore>()((set) => ({
     })),
 
   incrementScore: () =>
-    set((state) => ({
-      gameState: {
-        ...state.gameState,
-        score: state.gameState.score + 1,
-      },
-    })),
+    set((state) => {
+      const newScore = state.gameState.score + 1;
+      return {
+        gameState: {
+          ...state.gameState,
+          score: newScore,
+          highScore: Math.max(state.gameState.highScore, newScore),
+        },
+      };
+    }),
 
   updateHighScore: (score: number) =>
     set((state) => ({
@@ -86,7 +99,19 @@ export const useGameStateStore = create<GameStateStore>()((set) => ({
     set((state) => ({
       gameState: {
         ...initialGameState,
-        highScore: state.gameState.highScore, // Preserve high score
+        highScore: state.gameState.highScore,
+        showStartScreen: false,
+        isGameRunning: true,
+      },
+    })),
+
+  startGame: () =>
+    set((state) => ({
+      gameState: {
+        ...state.gameState,
+        showStartScreen: false,
+        isGameRunning: true,
+        isGameOver: false,
       },
     })),
 

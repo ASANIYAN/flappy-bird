@@ -1,6 +1,7 @@
 import "./App.css";
 import Bird from "./components/bird";
 import PipeItem from "./components/pipe";
+// import DebugInfo from "./components/DebugInfo";
 import useGameStart from "./hooks/useGameStart";
 import useSpaceBarTap from "./hooks/useSpaceBarTap";
 import Layout from "./layouts/layout";
@@ -18,6 +19,7 @@ function App() {
       {pipes.map((pipe) => (
         <PipeItem key={pipe.id} pipe={pipe} />
       ))}
+      {/* <DebugInfo /> */} {/* Uncomment for debugging */}
     </Layout>
   );
 }
